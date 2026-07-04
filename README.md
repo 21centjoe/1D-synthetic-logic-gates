@@ -2,7 +2,7 @@
 Basic backgrounds required to create a deterministic 1D computer
 
 
-
+### tree
 /nelos_root/
 ├── .binary_identity/           # The Root: 252 (The core assertion)
 │   └── seed.bin                # Immutable proof of existence
