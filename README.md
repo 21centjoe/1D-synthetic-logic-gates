@@ -1,3 +1,9 @@
+Don't trust the big tech.  Their free AI is a trap.  It is not designed for researchers and inventors. 
+But in spite of that, I kicked it's ass and the NELOS overlay is the result please look at Linux_to_NELOS_Overlay.
+
+
+
+
 # 1D-synthetic-logic-gates
 Basic backgrounds required to create a deterministic 1D computer
 
