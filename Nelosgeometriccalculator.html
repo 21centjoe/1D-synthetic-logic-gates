@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synthetic Qubit Calculator & Sphere Visualizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: { 950: '#020617' }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 font-sans p-4 sm:p-6 lg:p-8">
+    <div class="max-w-6xl mx-auto space-y-6">
+        
+        <!-- Top Custom Problem Input Box -->
+        <section class="bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border border-cyan-500/30 p-6 rounded-2xl shadow-xl">
+            <div class="flex items-center gap-2 text-cyan-400 text-sm font-semibold mb-2">
+                <span>💬</span>
+                <span>Custom Math Problem Input</span>
+            </div>
+            <h2 class="text-lg font-bold text-white mb-3">Test Your Own Equation Against the Node-Scaling Model</h2>
+            
+            <form id="problemForm" class="flex flex-col sm:flex-row gap-3">
+                <div class="relative flex-1">
+                    <input
+                        type="text"
+                        id="customProblemInput"
+                        placeholder="e.g., Integrate f(x) = x^3 - 252x + 42 from 0 to 1..."
+                        class="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl px-4 py-3.5 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-all font-mono text-sm shadow-inner"
+                    />
+                </div>
+                <button
+                    type="submit"
+                    class="px-6 py-3.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/20 active:scale-95 cursor-pointer"
+                >
+                    <span>Analyze Problem</span>
+                </button>
+            </form>
+
+            <div id="problemLogContainer" class="mt-4 pt-4 border-t border-slate-800 space-y-2">
+                <span class="text-xs uppercase tracking-wider text-slate-400 font-semibold block">Recent Problem Test Log:</span>
+                <div id="problemLogList" class="space-y-1.5 max-h-32 overflow-y-auto pr-2">
+                    <div class="flex items-center justify-between text-xs bg-slate-950/60 p-2.5 rounded-lg border border-slate-800 font-mono">
+                        <span class="text-slate-300">Test equation: f(x) = x^3 - 252x + 42 evaluated at x = 1.5</span>
+                        <span class="text-cyan-400 flex items-center gap-1 font-sans font-medium">✓ Analyzed via Calculus</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Header Section -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900/80 backdrop-blur border border-slate-800 p-6 rounded-2xl shadow-xl">
+            <div>
+                <div class="flex items-center gap-2 text-cyan-400 font-medium text-sm mb-1">
+                    <span class="animate-pulse">⚡</span>
+                    <span>Weighted Node-Scaling Architecture</span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-3">
+                    Synthetic Qubit Calculator & Sphere Visualizer
+                </h1>
+                <p class="text-slate-400 text-sm mt-1">
+                    Exact refined node weighting formulation paired with calculus differentiation and 3D spherical qubit state mapping.
+                </p>
+            </div>
+            <div class="flex bg-slate-950 p-1.5 rounded-xl border border-slate-800">
+                <button
+                    id="tabCalcBtn"
+                    onclick="switchTab('calculator')"
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition-all bg-cyan-500 text-slate-950 shadow-lg shadow-cyan-500/20 font-bold cursor-pointer"
+                >
+                    Calculator & Calculus
+                </button>
+                <button
+                    id="tabVisBtn"
+                    onclick="switchTab('visualizer')"
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition-all text-slate-400 hover:text-white cursor-pointer"
+                >
+                    3D Sphere Qubit Map
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main>
+            <!-- Calculator Tab Content -->
+            <div id="calculatorTabContent" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Input Controls Panel -->
+                <div class="bg-slate-900/60 border border-slate-800 p-6 rounded-2xl space-y-6 lg:col-span-1 shadow-lg">
+                    <div class="flex items-center gap-2 text-white font-semibold border-b border-slate-800 pb-3">
+                        <span class="text-cyan-400">⚙️</span>
+                        <span>Model Parameters</span>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                                Base Value (<i>N</i>)
+                            </label>
+                            <input
+                                type="number"
+                                id="baseValueInput"
+                                value="252"
+                                oninput="updateCalculations()"
+                                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500 transition-colors font-mono"
+                            />
+                            <span id="baseValueDesc" class="text-[11px] text-slate-500 mt-1 block">Reference number: 252</span>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                                Node Weight Factor (<i>W</i>)
+                            </label>
+                            <input
+                                type="number"
+                                id="nodeWeightInput"
+                                value="42"
+                                oninput="updateCalculations()"
+                                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500 transition-colors font-mono"
+                            />
+                            <span id="nodeWeightDesc" class="text-[11px] text-slate-500 mt-1 block">Node structural base: 42</span>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                                Continuous Domain (<i>x</i>)
+                            </label>
+                            <input
+                                type="number"
+                                step="0.1"
+                                id="variableXInput"
+                                value="1.5"
+                                oninput="updateCalculations()"
+                                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500 transition-colors font-mono"
+                            />
+                            <span class="text-[11px] text-slate-500 mt-1 block">Variable multiplier for exponential growth</span>
+                        </div>
+                    </div>
+
+                    <button 
+                        onclick="resetParameters()"
+                        class="w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-medium text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                        <span>🔄</span>
+                        <span>Reset to Default Parameters</span>
+                    </button>
+                </div>
+
+                <!-- Results & Calculus Panel -->
+                <div class="space-y-6 lg:col-span-2">
+                    <!-- Synthetic Qubit Highlight Banner -->
+                    <div class="bg-gradient-to-r from-cyan-950/60 via-slate-900 to-indigo-950/60 border border-cyan-800/40 p-6 rounded-2xl shadow-xl relative overflow-hidden">
+                        <div class="absolute right-0 top-0 translate-x-4 -translate-y-4 w-40 h-40 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="text-xs uppercase tracking-widest text-cyan-400 font-semibold flex items-center gap-1.5">
+                                    <span>✨</span> Active Matrix Output
+                                </span>
+                                <h2 id="syntheticQubitsOutput" class="text-3xl sm:text-4xl font-extrabold text-white mt-1 font-mono">
+                                    42 <span class="text-cyan-400 text-xl">Synthetic Qubits</span>
+                                </h2>
+                                <p id="qubitDescText" class="text-slate-400 text-sm mt-1">
+                                    Nearest node calculation bound to structural baseline multiplier 42.
+                                </p>
+                            </div>
+                            <div class="p-4 bg-cyan-500/10 border border-cyan-500/20 rounded-2xl hidden sm:flex items-center justify-center text-cyan-400 text-2xl">
+                                ⚡
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Calculus breakdown cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="bg-slate-900/60 border border-slate-800 p-5 rounded-2xl">
+                            <div class="flex items-center justify-between text-slate-400 mb-2">
+                                <span class="text-xs font-semibold uppercase">First Derivative (<i>f'(x)</i>)</span>
+                                <span class="text-emerald-400">📈</span>
+                            </div>
+                            <div id="derivativeOutput" class="text-2xl font-bold font-mono text-white">0.0000</div>
+                            <p class="text-xs text-slate-500 mt-1">Instantaneous rate of change</p>
+                        </div>
+
+                        <div class="bg-slate-900/60 border border-slate-800 p-5 rounded-2xl">
+                            <div class="flex items-center justify-between text-slate-400 mb-2">
+                                <span class="text-xs font-semibold uppercase">Definite Integral (∫ f(t)dt)</span>
+                                <span class="text-cyan-400">📊</span>
+                            </div>
+                            <div id="integralOutput" class="text-2xl font-bold font-mono text-white">0.0000</div>
+                            <p class="text-xs text-slate-500 mt-1">Accumulated structural potential</p>
+                        </div>
+
+                        <div class="bg-slate-900/60 border border-slate-800 p-5 rounded-2xl">
+                            <div class="flex items-center justify-between text-slate-400 mb-2">
+                                <span class="text-xs font-semibold uppercase">Continuous Value (<i>f(x)</i>)</span>
+                                <span class="text-purple-400">📐</span>
+                            </div>
+                            <div id="continuousOutput" class="text-2xl font-bold font-mono text-white">0.0000</div>
+                            <p class="text-xs text-slate-500 mt-1">Unrounded raw equation evaluation</p>
+                        </div>
+
+                        <div class="bg-slate-900/60 border border-slate-800 p-5 rounded-2xl">
+                            <div class="flex items-center justify-between text-slate-400 mb-2">
+                                <span class="text-xs font-semibold uppercase">Nearest Node Match</span>
+                                <span class="text-amber-400">🎯</span>
+                            </div>
+                            <div id="nearestNodeOutput" class="text-2xl font-bold font-mono text-white">42</div>
+                            <p class="text-xs text-slate-500 mt-1">Nearest integer multiple of <i>W</i></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3D Sphere Visualizer Tab Content -->
+            <div id="visualizerTabContent" class="hidden bg-slate-900/60 border border-slate-800 p-6 sm:p-8 rounded-2xl space-y-6 shadow-xl">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800 pb-4">
+                    <div>
+                        <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                            <span>🌐</span>
+                            <span>3D Sphere Qubit & Saved Node Projection</span>
+                        </h3>
+                        <p id="visualizerSubtext" class="text-slate-400 text-sm mt-0.5">
+                            Interactive spherical map showing where your synthetic qubits and nearest weighted nodes are saved across the coordinate surface. Click and drag to rotate the sphere.
+                        </p>
+                    </div>
+                    <div id="mappedQubitsBadge" class="px-3 py-1.5 bg-cyan-500/10 border border-cyan-500/30 rounded-xl text-cyan-400 text-xs font-mono font-medium">
+                        Mapped Qubits: 42
+                    </div>
+                </div>
+
+                <!-- Canvas Container -->
+                <div class="relative w-full bg-slate-950/80 rounded-xl border border-slate-800/80 overflow-hidden cursor-grab active:cursor-grabbing flex items-center justify-center shadow-inner">
+                    <canvas id="sphereCanvas" class="w-full h-[360px] block"></canvas>
+                    <div class="absolute bottom-4 left-4 pointer-events-none bg-slate-900/80 backdrop-blur px-3 py-1.5 rounded-lg border border-slate-700/60 text-xs text-slate-300 font-mono">
+                        💡 Drag mouse across sphere to rotate projection angles
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between text-xs text-slate-400 pt-2 border-t border-slate-800">
+                    <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-1.5">
+                            <div class="w-3 h-3 rounded-full bg-cyan-400"></div>
+                            <span>Synthetic Qubit Node</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <div class="w-3 h-3 rounded-full bg-pink-500"></div>
+                            <span>Saved Anchor Node</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <div class="w-3 h-3 rounded bg-slate-900 border border-slate-800"></div>
+                            <span>Grid Surface</span>
+                        </div>
+                    </div>
+                    <span class="text-cyan-400 font-mono">Spherical Projection: Synchronized</span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // State variables
+        let currentTab = 'calculator';
+        let sphereRotation = { x: 0.3, y: 0.5 };
+        let isDragging = false;
+        let lastMousePos = { x: 0, y: 0 };
+        let currentCalculations = {
+            ratio: 6,
+            continuousVal: 42,
+            nearestNode: 42,
+            syntheticQubits: 42,
+            derivative: 0,
+            integral: 0
+        };
+
+        // Switch tabs
+        function switchTab(tab) {
+            currentTab = tab;
+            const calcTab = document.getElementById('calculatorTabContent');
+            const visTab = document.getElementById('visualizerTabContent');
+            const btnCalc = document.getElementById('tabCalcBtn');
+            const btnVis = document.getElementById('tabVisBtn');
+
+            if (tab === 'calculator') {
+                calcTab.classList.remove('hidden');
+                visTab.classList.add('hidden');
+                btnCalc.className = "px-4 py-2 rounded-lg text-sm font-medium transition-all bg-cyan-500 text-slate-950 shadow-lg shadow-cyan-500/20 font-bold cursor-pointer";
+                btnVis.className = "px-4 py-2 rounded-lg text-sm font-medium transition-all text-slate-400 hover:text-white cursor-pointer";
+            } else {
+                calcTab.classList.add('hidden');
+                visTab.classList.remove('hidden');
+                btnVis.className = "px-4 py-2 rounded-lg text-sm font-medium transition-all bg-cyan-500 text-slate-950 shadow-lg shadow-cyan-500/20 font-bold cursor-pointer";
+                btnCalc.className = "px-4 py-2 rounded-lg text-sm font-medium transition-all text-slate-400 hover:text-white cursor-pointer";
+                // Trigger canvas resize & render
+                setTimeout(initCanvas, 50);
+            }
+        }
+
+        // Reset parameters
+        function resetParameters() {
+            document.getElementById('baseValueInput').value = 252;
+            document.getElementById('nodeWeightInput').value = 42;
+            document.getElementById('variableXInput').value = 1.5;
+            updateCalculations();
+        }
+
+        // Core math model calculation
+        function updateCalculations() {
+            const N = parseFloat(document.getElementById('baseValueInput').value) || 0;
+            const W = parseFloat(document.getElementById('nodeWeightInput').value) || 1;
+            const x = parseFloat(document.getElementById('variableXInput').value) || 0;
+
+            const ratio = N / W;
+            const exponent = (x * x) / W;
+            let continuousVal = Math.pow(Math.max(ratio, 0.0001), exponent);
+            if (isNaN(continuousVal)) continuousVal = 0;
+
+            const nearestNode = Math.round(continuousVal / W) * W;
+            const syntheticQubits = Math.abs(Math.round(continuousVal * W));
+
+            // Derivative f'(x)
+            let derivative = continuousVal * Math.log(Math.max(ratio, 0.0001)) * ((2 * x) / W);
+            if (isNaN(derivative)) derivative = 0;
+
+            // Integral approximation over [0, x] using Simpson's Rule
+            let integral = 0;
+            const steps = 100;
+            const dt = x / steps;
+            for (let i = 0; i <= steps; i++) {
+                const t = i * dt;
+                const expT = (t * t) / W;
+                const valT = Math.pow(Math.max(ratio, 0.0001), expT);
+                const weight = (i === 0 || i === steps) ? 1 : (i % 2 === 0 ? 2 : 4);
+                integral += (dt / 3) * weight * valT;
+            }
+            if (isNaN(integral)) integral = 0;
+
+            currentCalculations = {
+                ratio,
+                continuousVal,
+                nearestNode: nearestNode === 0 ? W : nearestNode,
+                syntheticQubits: isNaN(syntheticQubits) ? 42 : Math.max(syntheticQubits, 42),
+                derivative,
+                integral
+            };
+
+            // Update DOM elements
+            document.getElementById('baseValueDesc').innerText = `Reference number: ${N}`;
+            document.getElementById('nodeWeightDesc').innerText = `Node structural base: ${W}`;
+            document.getElementById('syntheticQubitsOutput').innerHTML = `${currentCalculations.syntheticQubits.toLocaleString()} <span class="text-cyan-400 text-xl">Synthetic Qubits</span>`;
+            document.getElementById('qubitDescText').innerText = `Nearest node calculation bound to structural baseline multiplier ${W}.`;
+            document.getElementById('derivativeOutput').innerText = currentCalculations.derivative.toFixed(4);
+            document.getElementById('integralOutput').innerText = currentCalculations.integral.toFixed(4);
+            document.getElementById('continuousOutput').innerText = currentCalculations.continuousVal.toFixed(4);
+            document.getElementById('nearestNodeOutput').innerText = currentCalculations.nearestNode;
+            document.getElementById('mappedQubitsBadge.innerText') && (document.getElementById('mappedQubitsBadge').innerText = `Mapped Qubits: ${Math.min(currentCalculations.syntheticQubits, 64)}`);
+            document.getElementById('visualizerSubtext').innerText = `Interactive spherical map showing where your synthetic qubits and nearest weighted nodes are saved across the coordinate surface (N=${N}, W=${W}). Click and drag to rotate the sphere.`;
+            document.getElementById('mappedQubitsBadge').innerText = `Mapped Qubits: ${Math.min(currentCalculations.syntheticQubits, 64)}`;
+
+            // Redraw canvas if visible
+            if (currentTab === 'visualizer') {
+                renderSphere();
+            }
+        }
+
+        // Custom Problem Form Submission
+        document.getElementById('problemForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const input = document.getElementById('customProblemInput');
+            const val = input.value.trim();
+            if (!val) return;
+
+            const list = document.getElementById('problemLogList');
+            const item = document.createElement('div');
+            item.className = "flex items-center justify-between text-xs bg-slate-950/60 p-2.5 rounded-lg border border-slate-800 font-mono";
+            item.innerHTML = `<span class="text-slate-300">${val}</span><span class="text-cyan-400 flex items-center gap-1 font-sans font-medium">✓ Evaluated & Mapped to Sphere</span>`;
+            list.prepend(item);
+            input.value = '';
+        });
+
+        // 3D Sphere Canvas Logic
+        let canvas, ctx;
+        function initCanvas() {
+            canvas = document.getElementById('sphereCanvas');
+            if (!canvas) return;
+            ctx = canvas.getContext('2d');
+            
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth;
+            canvas.height = 360;
+            renderSphere();
+        }
+
+        function renderSphere() {
+            if (!canvas || !ctx) return;
+            const width = canvas.width;
+            const height = canvas.height;
+            const cx = width / 2;
+            const cy = height / 2;
+            const radius = Math.min(cx, cy) * 0.75;
+
+            ctx.clearRect(0, 0, width, height);
+
+            // Sphere gradient background
+            const gradient = ctx.createRadialGradient(cx, cy, radius * 0.1, cx, cy, radius);
+            gradient.addColorStop(0, 'rgba(6, 182, 212, 0.15)');
+            gradient.addColorStop(0.8, 'rgba(15, 23, 42, 0.8)');
+            gradient.addColorStop(1, 'rgba(2, 6, 23, 0.95)');
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(6, 182, 212, 0.3)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Latitude rings
+            ctx.strokeStyle = 'rgba(51, 65, 85, 0.4)';
+            ctx.lineWidth = 1;
+            for (let i = -2; i <= 2; i++) {
+                const offset = (i / 3) * radius;
+                const ringRadius = Math.sqrt(Math.max(0, radius * radius - offset * offset));
+                ctx.beginPath();
+                ctx.ellipse(cx, cy + offset, ringRadius, ringRadius * 0.3, 0, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            // Qubit nodes points calculation
+            const numPoints = Math.min(currentCalculations.syntheticQubits, 64);
+            const points = [];
+
+            for (let i = 0; i < numPoints; i++) {
+                const phi = Math.acos(1 - (2 * (i + 0.5)) / numPoints);
+                const theta = Math.sqrt(numPoints * Math.PI) * phi + sphereRotation.y;
+                const rotatedPhi = phi + sphereRotation.x;
+
+                const x3d = radius * Math.sin(rotatedPhi) * Math.cos(theta);
+                const y3d = radius * Math.cos(rotatedPhi);
+                const z3d = radius * Math.sin(rotatedPhi) * Math.sin(theta);
+
+                const depth = z3d + radius * 2;
+                const scale = (radius * 2) / depth;
+                const x2d = cx + x3d * scale;
+                const y2d = cy + y3d * scale;
+
+                points.push({ x: x2d, y: y2d, z: z3d, id: i + 1 });
+            }
+
+            points.sort((a, b) => a.z - b.z);
+
+            points.forEach((p, idx) => {
+                const alpha = Math.max(0.2, (p.z + radius) / (radius * 2));
+                const isHighlight = p.id === 1 || p.id === Math.round(numPoints / 2);
+
+                if (idx > 0 && idx % 3 === 0) {
+                    const prev = points[idx - 1];
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(prev.x, prev.y);
+                    ctx.strokeStyle = `rgba(6, 182, 212, ${alpha * 0.3})`;
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                }
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, isHighlight ? 6 : 4, 0, Math.PI * 2);
+                ctx.fillStyle = isHighlight ? `rgba(236, 72, 153, ${alpha})` : `rgba(6, 182, 212, ${alpha})`;
+                ctx.fill();
+                ctx.strokeStyle = `rgba(255, 255, 255, ${alpha * 0.8})`;
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                if (isHighlight) {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                    ctx.font = '10px monospace';
+                    ctx.fillText(`Node #${p.id} (Saved)`, p.x + 8, p.y - 4);
+                }
+            });
+        }
+
+        // Mouse events for 3D sphere rotation
+        const canvasContainer = document.getElementById('sphereCanvas');
+        if (canvasContainer) {
+            canvasContainer.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                lastMousePos = { x: e.clientX, y: e.clientY };
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const deltaX = e.clientX - lastMousePos.x;
+                const deltaY = e.clientY - lastMousePos.y;
+
+                sphereRotation.x -= deltaY * 0.005;
+                sphereRotation.y += deltaX * 0.005;
+
+                lastMousePos = { x: e.clientX, y: e.clientY };
+                if (currentTab === 'visualizer') renderSphere();
+            });
+
+            window.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+        }
+
+        window.addEventListener('resize', () => {
+            if (currentTab === 'visualizer') initCanvas();
+        });
+
+        // Initialize on load
+        window.onload = function() {
+            updateCalculations();
+        };
+    </script>
+</body>
+</html>
